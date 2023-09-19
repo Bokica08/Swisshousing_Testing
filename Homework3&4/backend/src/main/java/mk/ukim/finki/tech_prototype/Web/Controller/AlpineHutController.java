@@ -52,7 +52,6 @@ public class AlpineHutController {
                 .map(alpineHut -> ResponseEntity.ok().body(alpineHut))
                 .orElseGet(()->ResponseEntity.badRequest().build());
     }
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<AlpineHut> save(@RequestBody AlpineHutDTO alpineHutDTO)
     {
