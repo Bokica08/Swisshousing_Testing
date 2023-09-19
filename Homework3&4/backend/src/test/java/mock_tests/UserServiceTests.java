@@ -56,7 +56,7 @@ public class UserServiceTests {
         UserDTO userDTO = new UserDTO("bojan", "Test1234!", "Test1234!",
                 "Bojan", "Trpeski", Role.ROLE_USER);
         Optional<User> result = userServiceImpl.register(userDTO);
-        verify(userRepository).save(any(User.class)); // Assuming the save method
+        verify(userRepository).save(any(User.class));
 
     }
 
@@ -156,19 +156,19 @@ public class UserServiceTests {
         User expectedUser = new User();
         expectedUser.setRole(Role.ROLE_PENDING_ADMIN);
         when(userRepository.findByUsername(validUsername)).thenReturn(Optional.of(expectedUser));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0)); // This just returns the same user that was passed to save method
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        userServiceImpl.authorizePendingAdmin(validUsername);
         verify(userRepository).findByUsername(validUsername);
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     public void findAllPendingAdmins() {
-        // Sample data
         User pendingAdmin1 = new User("user1", "B", "T", "password", Role.ROLE_PENDING_ADMIN);
         User pendingAdmin2 = new User("user2", "BT", "BT", "password", Role.ROLE_PENDING_ADMIN);
 
         when(userRepository.findAllByRole(Role.ROLE_PENDING_ADMIN)).thenReturn(Arrays.asList(pendingAdmin1, pendingAdmin2));
-
+        userServiceImpl.findAllPendingAdmins();
         verify(userRepository).findAllByRole(Role.ROLE_PENDING_ADMIN);
 
     }
