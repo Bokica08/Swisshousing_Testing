@@ -17,7 +17,7 @@
         <option value="name">Name</option>
         <option value="stars">Stars</option>
     </select>
-    <input class="form-control" type="text" placeholder="Default input" aria-label="default input example"
+    <input class="form-control" type="text" name="filter" placeholder="Default input" aria-label="default input example"
     style="margin-top:20px; margin-left:50px; float:left; width: 400px;" type="text" [(ngModel)]="filterBy" placeholder="Search by {{dropDownResult}}" (keyup)="filter()">
 </div>
 <div>
@@ -49,12 +49,12 @@
                                     
                                         
                                         
-                                    <button class="btn btn-danger tooltips" data-placement="top" data-original-title="Edit" (click)="getHotel(employee.locationId)">Edit</button>
+                                    <button class="btn btn-danger tooltips editHotelButton" data-placement="top" data-original-title="Edit" (click)="getHotel(employee.locationId)">Edit</button>
 
                                    <!-- <a role="button" class="btn btn-secondary tooltips" data-placement="top" data-original-title="Delete"><i
                                             class="fa fa-times"  (click)="test()"></i>Delete</a>-->
                                             
-                                            <button class="btn btn-secondary tooltips" data-placement="top" data-original-title="Delete" (click)="deleteHotel(employee.locationId)">Delete</button>
+                                            <button class="btn btn-secondary tooltips deleteHotelButton" data-placement="top" data-original-title="Delete" (click)="deleteHotel(employee.locationId)">Delete</button>
                                 
 
 
