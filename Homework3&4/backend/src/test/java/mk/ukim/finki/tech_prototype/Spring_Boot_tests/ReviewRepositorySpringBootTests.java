@@ -1,4 +1,4 @@
-package mk.ukim.finki.tech_prototype.integration_tests;
+package mk.ukim.finki.tech_prototype.Spring_Boot_tests;
 import mk.ukim.finki.tech_prototype.Model.Enumeration.Role;
 import mk.ukim.finki.tech_prototype.Model.Review;
 import mk.ukim.finki.tech_prototype.Model.Location;
@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DataJpaTest
-public class ReviewRepositoryIntegrationTests  {
+public class ReviewRepositorySpringBootTests {
 
     @Autowired
     private ReviewRepository reviewRepository;

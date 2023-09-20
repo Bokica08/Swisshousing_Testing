@@ -1,4 +1,4 @@
-package mk.ukim.finki.tech_prototype.integration_tests;
+package mk.ukim.finki.tech_prototype.Spring_Boot_tests;
 import mk.ukim.finki.tech_prototype.Model.Hotel;
 import mk.ukim.finki.tech_prototype.Repository.HotelRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
-public class HotelRepositoryIntegrationTests {
+public class HotelRepositorySpringBootTests {
 
     @Autowired
     private HotelRepository hotelRepository;

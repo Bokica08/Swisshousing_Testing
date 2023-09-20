@@ -1,4 +1,4 @@
-package mk.ukim.finki.tech_prototype.integration_tests;
+package mk.ukim.finki.tech_prototype.Spring_Boot_tests;
 
 import mk.ukim.finki.tech_prototype.Model.AlpineHut;
 import mk.ukim.finki.tech_prototype.Model.DTO.AlpineHutDTO;
@@ -22,7 +22,7 @@ import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AlpineHutIntegrationTests {
+public class AlpineHutSpringBootTests {
 
     @Autowired
     private TestRestTemplate restTemplate;
