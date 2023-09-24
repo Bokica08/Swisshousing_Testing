@@ -12,6 +12,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.Assert;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 public class LoginStepDefinitions {
     private WebDriver driver;
@@ -40,10 +45,11 @@ public class LoginStepDefinitions {
         loginButton.click();
     }
 
-    @Then("I should be logged in")
-    public void iShouldBeLoggedIn() {
-        WebElement welcomeMessage = driver.findElement(By.id("loggedInUser"));
-        Assert.assertTrue(welcomeMessage.isDisplayed());
+    @Then("I should be logged in with username {string}")
+    public void iShouldBeLoggedIn(String username) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.of(10, ChronoUnit.SECONDS));
+
+        wait.until(ExpectedConditions.textToBe(By.id("loggedInUser"), username));
     }
 
     @After

@@ -1,10 +1,10 @@
+@tag2
 Feature: Hotel Management
 
   Background:
     Given I am logged in as "JDoe" with password "Password@123"
     And I am on the home page and redirected to add hotel page
 
-  @tag2
   Scenario: Add a Hotel
     When I add a hotel with the following details:
       | X    | Y     | Name        | City      | Street       | House Number | Description        | Image Path     | Website                 | Phone Number | Stars |
