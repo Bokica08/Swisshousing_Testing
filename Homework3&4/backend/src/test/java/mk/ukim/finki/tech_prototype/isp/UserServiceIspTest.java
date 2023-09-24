@@ -51,19 +51,26 @@ public class UserServiceIspTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         location.setLocationId(1L);
+
         registerUser = new User("dare431", "Darko", "Sasanski", passwordEncoder.encode("Password@123"), Role.ROLE_USER);
+        when(userRepository.save(registerUser)).thenReturn(registerUser);
+
         admin = new User("admin", "Admin", "Admin", passwordEncoder.encode("Admin123!"), Role.ROLE_ADMIN);
         admin.getFavourites().add(location);
         admin.getVisited().add(location);
         when(userRepository.save(admin)).thenReturn(admin);
+
         pendingAdmin = new User("pendingAdmin", "Pending", "Admin", passwordEncoder.encode("Admin123!"), Role.ROLE_PENDING_ADMIN);
+
         userFavourites = new User("andrejT", "Andrej", "Todorovski", passwordEncoder.encode("Password@123"), Role.ROLE_USER);
         when(userRepository.save(userFavourites)).thenReturn(userFavourites);
+
         userVisited = new User("aleksej", "Aleksej", "Ivanovski", passwordEncoder.encode("Password@123"), Role.ROLE_USER);
         when(userRepository.save(userVisited)).thenReturn(userVisited);
-        when(userRepository.save(registerUser)).thenReturn(registerUser);
+
         User pendingAdminMadeAdmin = new User("pendingAdmin", "Pending", "Admin", passwordEncoder.encode("Admin123!"), Role.ROLE_ADMIN);
         when(userRepository.save(pendingAdminMadeAdmin)).thenReturn(pendingAdminMadeAdmin);
+
         userServiceImpl = new UserServiceImpl(userRepository, passwordEncoder, locationRepository);
     }
 
@@ -73,21 +80,26 @@ public class UserServiceIspTest {
     @Test
     public void loadUserByUsernameTest1() {
         String username = "admin";
-        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.ofNullable(admin));
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(admin));
+
         UserDetails user = userServiceImpl.loadUserByUsername(username);
         Assertions.assertEquals(user.getUsername(), admin.getUsername());
-        verify(userRepository).findByUsername(username);
 
+        verify(userRepository).findByUsername(username);
     }
 
     // Test 2 T T, username is empty and user is not found
     @Test
     public void loadUserByUsernameTest2() {
         String username = "";
-        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.empty());
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
         assertThrows(UsernameNotFoundException.class, () -> {
             userServiceImpl.loadUserByUsername(username);
         });
+
         verify(userRepository).findByUsername(username);
     }
 
@@ -95,189 +107,226 @@ public class UserServiceIspTest {
     @Test
     public void loadUserByUsernameTest3() {
         String username = "bojan08";
-        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.empty());
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
         assertThrows(UsernameNotFoundException.class, () -> {
             userServiceImpl.loadUserByUsername(username);
         });
+
         verify(userRepository).findByUsername(username);
     }
 
     // Testing of registerUser(UserDTO userDTO)
 
-    // Test 1 F F T F
+    // Test 1 F F T F username and password are not null, passwords match, user is not already registered
     @Test
     public void registerUserTest1() {
         UserDTO userDTO = new UserDTO("dare431", "Password@123", "Password@123", "Darko", "Sasanski", Role.ROLE_USER);
+
         Optional<User> result = userServiceImpl.register(userDTO);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), registerUser.getUsername());
+
         verify(userRepository).save(registerUser);
     }
 
-    // Test 2 T F T F
+    // Test 2 T F T F username is null, password is not null, passwords match, user is not already registered
     @Test
     public void registerUserTest2() {
         UserDTO userDTO = new UserDTO(null, "Password@123", "Password@123", "Darko", "Sasanski", Role.ROLE_USER);
+
         Assertions.assertThrows(InvalidArgumentsException.class, () -> {
             userServiceImpl.register(userDTO);
         });
     }
 
-    // Test 3 F T T F
+    // Test 3 F T T F username is not null, password is null, passwords match, user is not already registered
     @Test
     public void registerUserTest3() {
         UserDTO userDTO = new UserDTO("dare431", null, "Password@123", "Darko", "Sasanski", Role.ROLE_USER);
+
         Assertions.assertThrows(InvalidArgumentsException.class, () -> {
             userServiceImpl.register(userDTO);
         });
     }
 
-    // Test 4 F F F F
+    // Test 4 F F F F username and password are not null, passwords do not match, user is not already registered
     @Test
     public void registerUserTest4() {
         UserDTO userDTO = new UserDTO("dare431", "Password@123", "Password@12", "Darko", "Sasanski", Role.ROLE_USER);
+
         Assertions.assertThrows(PasswordsDoNotMatchException.class, () -> {
             userServiceImpl.register(userDTO);
         });
     }
 
-    // Test 5 T F T T
+    // Test 5 F F T T username and password are not null, passwords match, user is already registered
     @Test
     public void registerUserTest5() {
         UserDTO userDTO = new UserDTO("admin", "Password@123", "Password@123", "Darko", "Sasanski", Role.ROLE_USER);
+
         when(userRepository.findByUsername(userDTO.getUsername())).thenReturn(Optional.of(admin));
         Assertions.assertThrows(UsernameAlreadyExistsException.class, () -> {
             userServiceImpl.register(userDTO);
         });
+
         verify(userRepository).findByUsername(userDTO.getUsername());
     }
 
     // Testing of pendingAdmin(String username)
 
-    // Test 1 T F F
+    // Test 1 F F F username is not empty, user is found and user has role ROLE_PENDING_ADMIN
     @Test
     public void pendingAdminTest1() {
         String username = "pendingAdmin";
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(pendingAdmin));
+
         Optional<User> result = userServiceImpl.authorizePendingAdmin(username);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), pendingAdmin.getUsername());
         Assertions.assertEquals(result.get().getRole(), Role.ROLE_ADMIN);
+
         verify(userRepository).findByUsername(username);
     }
 
-    // Test 2 F T F
+    // Test 2 T T T username is empty, user is not found and user doesn't have role ROLE_PENDING_ADMIN
     @Test
     public void pendingAdminTest2() {
         String username = "";
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> {
             userServiceImpl.authorizePendingAdmin(username);
         });
+
         verify(userRepository).findByUsername(username);
     }
 
-    // Test 3 F T F
+    // Test 3 F T T username is not empty, user is not found and user doesn't have role ROLE_PENDING_ADMIN
     @Test
     public void pendingAdminTest3() {
         String username = "bojan08";
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
         assertThrows(UsernameNotFoundException.class, () -> {
             userServiceImpl.authorizePendingAdmin(username);
+
         });
         verify(userRepository).findByUsername(username);
     }
 
-    // Test 4 F F T
+    // Test 4 F F T username is not empty, user is found and user doesn't have role ROLE_PENDING_ADMIN
     @Test
     public void pendingAdminTest4() {
         String username = "dare431";
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(registerUser));
         assertThrows(InvalidArgumentsException.class, () -> {
             userServiceImpl.authorizePendingAdmin(username);
         });
+
         verify(userRepository).findByUsername(username);
     }
 
     // Testing of addToFavourites(String username, Long locationId)
 
-    // Test 1 F T F
+    // Test 1 F T F username is not empty, locationId is greater than 0 and user haven't already added that location
     @Test
     public void addToFavouritesTest1() {
         String username = "andrejT";
         Long locationId = 1L;
+
         int numberOfFavourites = userFavourites.getFavourites().size();
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(userFavourites));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
         Optional<User> result = userServiceImpl.addToFavourites(username, locationId);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), userFavourites.getUsername());
         Assertions.assertEquals(result.get().getFavourites().size(), numberOfFavourites + 1);
+
         verify(userRepository).findByUsername(username);
         verify(locationRepository).findById(locationId);
     }
 
-    // Test 2 T T F
+    // Test 2 T T F username is empty, locationId is greater than 0 and user haven't already added that location
     @Test
     public void addToFavouritesTest2() {
         String username = "";
         Long locationId = 1L;
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
         assertThrows(UsernameNotFoundException.class, () -> {
             userServiceImpl.addToFavourites(username, locationId);
         });
+
         verify(userRepository).findByUsername(username);
     }
 
-    // Test 3 F F F
+    // Test 3 F F F username is not empty, locationId is less or equal than 0 and user haven't already added that location
     @Test
     public void addToFavouritesTest3() {
         String username = "andrejT";
         Long locationId = -1L;
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(userFavourites));
         when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
+
         assertThrows(LocationNotFoundException.class, () -> {
             userServiceImpl.addToFavourites(username, locationId);
         });
+
         verify(userRepository).findByUsername(username);
         verify(locationRepository).findById(locationId);
     }
 
-    // Test 4 F T T
+    // Test 4 F T T username is not empty, locationId is greater than 0 and user have already added that location
     @Test
     public void addToFavouritesTest4() {
         String username = "admin";
         Long locationId = 1L;
+
         int numberOfFavourites = admin.getFavourites().size();
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(admin));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
         Optional<User> result = userServiceImpl.addToFavourites(username, locationId);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), admin.getUsername());
         Assertions.assertEquals(result.get().getFavourites().size(), numberOfFavourites);
+
         verify(userRepository).findByUsername(username);
         verify(locationRepository).findById(locationId);
     }
 
     // Testing of addToVisited(String username, Long locationId)
 
-    // Test 1 F T F
+    // Test 1 F T F username is not empty, locationId is greater than 0 and user haven't already added that location
     @Test
     public void addToVisitedTest1() {
         String username = "aleksej";
         Long locationId = 1L;
+
         int numberOfVisited = userVisited.getVisited().size();
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(userVisited));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
         Optional<User> result = userServiceImpl.addToVisited(username, locationId);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), userVisited.getUsername());
         Assertions.assertEquals(result.get().getVisited().size(), numberOfVisited + 1);
+
         verify(userRepository).findByUsername(username);
         verify(locationRepository).findById(locationId);
     }
 
-    // Test 2 T T F
+    // Test 2 T T F username is empty, locationId is greater than 0 and user haven't already added that location
     @Test
     public void addToVisitedTest2() {
         String username = "";
@@ -289,7 +338,7 @@ public class UserServiceIspTest {
         verify(userRepository).findByUsername(username);
     }
 
-    // Test 3 F F F
+    // Test 3 F F F username is not empty, locationId is less or equal than 0 and user haven't already added that location
     @Test
     public void addToVisitedTest3() {
         String username = "andrejT";
@@ -303,18 +352,22 @@ public class UserServiceIspTest {
         verify(locationRepository).findById(locationId);
     }
 
-    // Test 4 F T T
+    // Test 4 F T T username is not empty, locationId is greater than 0 and user have already added that location
     @Test
     public void addToVisitedTest4() {
         String username = "admin";
         Long locationId = 1L;
+
         int numberOfFavourites = admin.getVisited().size();
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(admin));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
         Optional<User> result = userServiceImpl.addToVisited(username, locationId);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().getUsername(), admin.getUsername());
         Assertions.assertEquals(result.get().getFavourites().size(), numberOfFavourites);
+
         verify(userRepository).findByUsername(username);
         verify(locationRepository).findById(locationId);
     }
